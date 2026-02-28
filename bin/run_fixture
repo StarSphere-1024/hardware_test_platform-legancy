@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""
+Fixture runner CLI entry point.
+
+Run a test fixture by name.
+
+Usage:
+    run_fixture --name <fixture_name> [--sn <serial_number>]
+
+Examples:
+    run_fixture --name 功能快速验证
+    run_fixture --name 生产全功能测试 --sn SN12345
+"""
+
+import argparse
+import sys
+import os
+
+# Add project root to path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+from framework.core.fixture_runner import FixtureRunner
+from framework.logging.logger import Logger
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Run a test fixture",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+
+    parser.add_argument(
+        "--name",
+        type=str,
+        required=False,
+        default=None,
+        help="Name of the fixture to run",
+    )
+    parser.add_argument(
+        "--sn",
+        type=str,
+        default=None,
+        help="Serial number (for production testing)",
+    )
+    parser.add_argument(
+        "--fixtures-dir",
+        type=str,
+        default="fixtures",
+        help="Directory containing fixture configurations",
+    )
+    parser.add_argument(
+        "--cases-dir",
+        type=str,
+        default="cases",
+        help="Directory containing case configurations",
+    )
+    parser.add_argument(
+        "--functions-dir",
+        type=str,
+        default="functions",
+        help="Directory containing test functions",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List available fixtures",
+    )
+
+    args = parser.parse_args()
+
+    # Initialize logger
+    logger = Logger("run_fixture", level=Logger.LEVEL_BASIC)
+
+    # List fixtures if requested
+    if args.list:
+        runner = FixtureRunner(
+            cases_dir=args.cases_dir,
+            fixtures_dir=args.fixtures_dir,
+            functions_dir=args.functions_dir,
+        )
+        print("Available fixtures:")
+        for fixture in runner.list_fixtures():
+            print(f"  {fixture}")
+        return 0
+
+    # Validate --name is provided when not listing
+    if not args.name:
+        parser.error("--name is required (or use --list to see available fixtures)")
+
+    # Run fixture
+    logger.info(f"Running fixture: {args.name}")
+
+    runner = FixtureRunner(
+        cases_dir=args.cases_dir,
+        fixtures_dir=args.fixtures_dir,
+        functions_dir=args.functions_dir,
+    )
+
+    result = runner.run_by_name(args.name, sn=args.sn)
+
+    if not result:
+        logger.error(f"Fixture '{args.name}' not found")
+        return 2
+
+    # Print summary
+    print("\n" + "=" * 50)
+    print(f"Fixture: {result.fixture_name}")
+    print(f"Status: {result.status.upper()}")
+    print(f"Duration: {result.duration:.2f}s")
+    print(f"Pass: {result.total_pass} | Fail: {result.total_fail}")
+
+    if result.case_results:
+        print("\nCase Results:")
+        for case_result in result.case_results:
+            status_icon = "✓" if case_result.success else "✗"
+            print(f"  {status_icon} {case_result.case_name}: {case_result.status}")
+            if case_result.error:
+                print(f"    Error: {case_result.error}")
+
+    print("=" * 50)
+
+    # Return exit code
+    if result.success:
+        return 0
+    elif result.status == "partial":
+        return 1
+    else:
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

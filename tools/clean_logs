@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# Clean logs script
+# Remove old log files based on retention policy
+#
+# Usage:
+#     ./tools/clean_logs [--days N]
+#
+# Options:
+#     --days N    Keep logs from last N days (default: 7)
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+LOGS_DIR="$PROJECT_ROOT/logs"
+
+DAYS=7
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --days)
+            DAYS="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+echo "Cleaning logs older than $DAYS days..."
+
+if [ ! -d "$LOGS_DIR" ]; then
+    echo "Logs directory not found: $LOGS_DIR"
+    exit 0
+fi
+
+# Find and remove old log files
+find "$LOGS_DIR" -name "*.log" -type f -mtime +$DAYS -delete
+find "$LOGS_DIR" -name "*.log.gz" -type f -mtime +$DAYS -delete
+
+echo "Clean complete!"

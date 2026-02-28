@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# Clean reports script
+# Remove old report files based on retention policy
+#
+# Usage:
+#     ./tools/clean_reports [--days N] [--keep-failed]
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+REPORTS_DIR="$PROJECT_ROOT/reports"
+
+DAYS=30
+KEEP_FAILED=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --days)
+            DAYS="$2"
+            shift 2
+            ;;
+        --keep-failed)
+            KEEP_FAILED=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+echo "Cleaning reports older than $DAYS days..."
+
+if [ ! -d "$REPORTS_DIR" ]; then
+    echo "Reports directory not found: $REPORTS_DIR"
+    exit 0
+fi
+
+if [ "$KEEP_FAILED" = true ]; then
+    echo "Keeping failed reports..."
+    # Remove only pass reports older than N days
+    find "$REPORTS_DIR" -name "*_pass.report" -type f -mtime +$DAYS -delete
+else
+    # Remove all old reports
+    find "$REPORTS_DIR" -name "*.report" -type f -mtime +$DAYS -delete
+fi
+
+echo "Clean complete!"

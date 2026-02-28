@@ -1,0 +1,28 @@
+{
+  "case_name": "Ethernet Module Test",
+  "description": "Complete Ethernet module testing including connectivity and speed",
+  "module": "eth",
+  "functions": [
+    {
+      "name": "test_eth",
+      "params": {
+        "ip": "192.168.1.1",
+        "count": 4
+      },
+      "enabled": true
+    },
+    {
+      "name": "test_eth",
+      "params": {
+        "ip": "192.168.1.1",
+        "iperf3": false,
+        "count": 10
+      },
+      "enabled": true
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 5
+}

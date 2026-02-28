@@ -1,0 +1,21 @@
+{
+  "product": {
+    "sku": "CM4",
+    "stage": "DVT",
+    "default_sn_for_test": "DVT",
+    "engineer": "TBD"
+  },
+  "runtime": {
+    "default_retry": 2,
+    "default_retry_interval": 5,
+    "default_timeout": 60
+  },
+  "dashboard": {
+    "enabled": true,
+    "system_monitor": {
+      "enabled": true,
+      "refresh_interval": 2,
+      "log_enabled": true
+    }
+  }
+}

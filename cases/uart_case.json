@@ -1,0 +1,19 @@
+{
+  "case_name": "UART Module Test",
+  "description": "UART serial communication test",
+  "module": "uart",
+  "functions": [
+    {
+      "name": "test_uart",
+      "params": {
+        "port": "/dev/ttyUSB0",
+        "baudrate": 115200
+      },
+      "enabled": true
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 30,
+  "retry": 2,
+  "retry_interval": 3
+}

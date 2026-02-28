@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+"""
+Case runner CLI entry point.
+
+Run a test case from JSON configuration.
+
+Usage:
+    run_case --config <case_json_path>
+
+Examples:
+    run_case --config cases/eth_case.json
+    run_case --config eth_case
+"""
+
+import argparse
+import sys
+import os
+
+# Add project root to path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
+from framework.core.case_runner import CaseRunner
+from framework.logging.logger import Logger
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Run a test case",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+
+    parser.add_argument(
+        "--config",
+        type=str,
+        required=True,
+        help="Path to case JSON configuration file",
+    )
+    parser.add_argument(
+        "--retry",
+        type=int,
+        default=0,
+        help="Number of retries on failure",
+    )
+    parser.add_argument(
+        "--retry-interval",
+        type=int,
+        default=5,
+        help="Interval between retries (seconds)",
+    )
+    parser.add_argument(
+        "--cases-dir",
+        type=str,
+        default="cases",
+        help="Directory containing case configurations",
+    )
+    parser.add_argument(
+        "--functions-dir",
+        type=str,
+        default="functions",
+        help="Directory containing test functions",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List available cases",
+    )
+
+    args = parser.parse_args()
+
+    # Initialize logger
+    logger = Logger("run_case", level=Logger.LEVEL_BASIC)
+
+    # List cases if requested
+    if args.list:
+        import glob
+        cases_dir = os.path.join(project_root, args.cases_dir)
+        if os.path.exists(cases_dir):
+            print("Available cases:")
+            for case_file in glob.glob(os.path.join(cases_dir, "*.json")):
+                print(f"  {os.path.basename(case_file)}")
+        return 0
+
+    # Run case
+    logger.info(f"Running case: {args.config}")
+
+    runner = CaseRunner(
+        functions_dir=args.functions_dir,
+        cases_dir=args.cases_dir,
+    )
+
+    result = runner.run_from_file(
+        args.config,
+        retry=args.retry,
+        retry_interval=args.retry_interval,
+    )
+
+    if not result:
+        logger.error(f"Case '{args.config}' not found")
+        return 2
+
+    # Print summary
+    print("\n" + "=" * 50)
+    print(f"Case: {result.case_name}")
+    print(f"Module: {result.module}")
+    print(f"Status: {result.status.upper()}")
+    print(f"Duration: {result.duration:.2f}s")
+    print(f"Functions: {result.pass_count}/{len(result.function_results)} passed")
+
+    if result.function_results:
+        print("\nFunction Results:")
+        for func_result in result.function_results:
+            status_icon = "✓" if func_result.success else "✗"
+            print(f"  {status_icon} {func_result.name}: {func_result.message}")
+
+    if result.error:
+        print(f"\nError: {result.error}")
+
+    print("=" * 50)
+
+    # Return exit code
+    return 0 if result.success else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

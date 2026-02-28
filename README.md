@@ -39,10 +39,10 @@ source venv/bin/activate
 ./bin/run_fixture --list
 
 # Run a fixture
-./bin/run_fixture --name 功能快速验证
+./bin/run_fixture --name quick_functional_test
 
 # Run with serial number (production testing)
-./bin/run_fixture --name 生产全功能测试 --sn SN12345
+./bin/run_fixture --name production_full_test --sn SN12345
 
 # Run a single case
 ./bin/run_case --config cases/eth_case.json
@@ -52,7 +52,7 @@ source venv/bin/activate
 
 ```bash
 # Start CLI dashboard
-python3 -m framework.dashboard.cli_dashboard
+python3 -m framework.dashboard --fixture network_test
 ```
 
 ## Architecture
@@ -109,8 +109,9 @@ hardware_test_platform/
 │   ├── eth_case.json
 │   └── ...
 ├── fixtures/               # Fixture configurations
-│   ├── 功能快速验证.json
-│   └── ...
+│   ├── network_test.json
+│   ├── production_full_test.json
+│   └── quick_functional_test.json
 ├── config/                 # Global configurations
 │   └── global_config.json
 ├── logs/                   # Log files (auto-created)
@@ -173,7 +174,7 @@ hardware_test_platform/
 
 ```json
 {
-  "fixture_name": "功能快速验证",
+  "fixture_name": "quick_functional_test",
   "cases": ["cases/eth_case.json"],
   "execution": "sequential",
   "stop_on_failure": false,

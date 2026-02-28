@@ -5,7 +5,6 @@ System Monitor - Real-time system metrics collection.
 """
 
 import json
-import os
 import threading
 import time
 from pathlib import Path
@@ -142,14 +141,52 @@ class SystemMonitor:
         # CPU temperature (Linux)
         temperature = self._get_cpu_temperature()
 
+        # CPU frequency (MHz)
+        frequency_mhz = self._get_cpu_frequency_mhz()
+
         # CPU count
         cpu_count = psutil.cpu_count(logical=True)
 
         return {
             "usage_percent": round(cpu_percent, 1),
+            "frequency_mhz": frequency_mhz,
             "temperature": temperature,
             "cores": cpu_count,
         }
+
+    def _get_cpu_frequency_mhz(self) -> Optional[float]:
+        """
+        Get current CPU frequency in MHz.
+
+        获取当前 CPU 频率（MHz）
+        """
+        try:
+            # Method 1: psutil
+            cpu_freq = psutil.cpu_freq()
+            if cpu_freq and cpu_freq.current:
+                return round(float(cpu_freq.current), 1)
+
+            # Method 2: Linux sysfs per-cpu current frequency (kHz)
+            freq_files = sorted(
+                Path("/sys/devices/system/cpu").glob(
+                    "cpu[0-9]*/cpufreq/scaling_cur_freq"
+                )
+            )
+            values_mhz = []
+            for freq_file in freq_files:
+                try:
+                    with open(freq_file, "r", encoding="utf-8") as file_obj:
+                        khz = int(file_obj.read().strip())
+                    values_mhz.append(khz / 1000.0)
+                except (OSError, ValueError):
+                    continue
+
+            if values_mhz:
+                return round(sum(values_mhz) / len(values_mhz), 1)
+        except Exception:
+            pass
+
+        return None
 
     def _get_cpu_temperature(self) -> Optional[float]:
         """

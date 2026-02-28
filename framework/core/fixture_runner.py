@@ -18,6 +18,14 @@ from typing import Any, Dict, List, Optional
 from .case_runner import CaseRunner, CaseResult
 from .result_store import ResultStore
 
+# Optional monitoring import
+try:
+    from framework.monitoring import SystemMonitor
+    MONITORING_AVAILABLE = True
+except ImportError:
+    MONITORING_AVAILABLE = False
+    SystemMonitor = None  # type: ignore
+
 
 @dataclass
 class FixtureResult:
@@ -146,6 +154,12 @@ class FixtureRunner:
         retry = fixture_config.get("retry", 0)
         retry_interval = fixture_config.get("retry_interval", 5)
 
+        # Start system monitoring if available
+        monitor = None
+        if MONITORING_AVAILABLE:
+            monitor = SystemMonitor()
+            monitor.start()
+
         start_time = time.time()
         all_case_results: List[CaseResult] = []
         total_pass = 0
@@ -203,6 +217,10 @@ class FixtureRunner:
                 time.sleep(loop_interval)
 
         duration = time.time() - start_time
+
+        # Stop system monitoring
+        if monitor:
+            monitor.stop()
 
         # Determine overall status
         if total_fail == 0:

@@ -12,8 +12,6 @@ import os
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
-from framework.dashboard.cli_dashboard import run_dashboard
-
 if __name__ == "__main__":
     import argparse
 
@@ -36,14 +34,18 @@ if __name__ == "__main__":
         default=1.0,
         help="Refresh interval in seconds",
     )
-
     args = parser.parse_args()
 
     try:
-        run_dashboard(
-            fixture_name=args.fixture,
+        from framework.dashboard.cli_dashboard import CLIDashboard
+
+        dashboard = CLIDashboard(
             tmp_dir=args.tmp_dir,
             refresh_interval=args.refresh,
+        )
+        dashboard.start(
+            fixture_name=args.fixture,
+            start_monitor=True,
         )
     except KeyboardInterrupt:
         print("\nDashboard stopped.")

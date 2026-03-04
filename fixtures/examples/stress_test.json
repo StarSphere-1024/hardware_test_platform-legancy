@@ -1,0 +1,18 @@
+{
+  "fixture_name": "stress_test",
+  "description": "压力测试 - 多次循环运行所有测试",
+  "cases": [
+    "cases/eth_case.json",
+    "cases/uart_case.json"
+  ],
+  "execution": "sequential",
+  "stop_on_failure": false,
+  "loop": true,
+  "loop_count": 10,
+  "loop_interval": 2,
+  "retry": 3,
+  "retry_interval": 5,
+  "report_enabled": true,
+  "sn_required": false,
+  "timeout": 600
+}

@@ -1,0 +1,17 @@
+{
+  "fixture_name": "quick_functional_test",
+  "description": "Quick functional verification for R&D - basic connectivity tests",
+  "cases": [
+    "cases/eth_case.json",
+    "cases/uart_case.json"
+  ],
+  "execution": "sequential",
+  "stop_on_failure": false,
+  "loop": false,
+  "loop_count": 1,
+  "loop_interval": 0,
+  "retry": 1,
+  "retry_interval": 3,
+  "report_enabled": true,
+  "sn_required": false
+}

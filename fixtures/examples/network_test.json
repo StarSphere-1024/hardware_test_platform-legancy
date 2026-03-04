@@ -1,0 +1,14 @@
+{
+  "fixture_name": "network_test",
+  "description": "Network connectivity tests only",
+  "cases": [
+    "cases/eth_case.json"
+  ],
+  "execution": "sequential",
+  "stop_on_failure": false,
+  "loop": false,
+  "retry": 1,
+  "retry_interval": 3,
+  "report_enabled": false,
+  "sn_required": false
+}

@@ -1,0 +1,23 @@
+{
+  "fixture_name": "full_hardware_test",
+  "description": "完整硬件测试 - 所有模块全面测试",
+  "cases": [
+    "eth_case.json",
+    "uart_case.json",
+    "i2c_case.json",
+    "usb_case.json",
+    "rtc_case.json",
+    "gpio_case.json",
+    "wifi_case.json"
+  ],
+  "execution": "sequential",
+  "stop_on_failure": false,
+  "loop": false,
+  "loop_count": 1,
+  "loop_interval": 0,
+  "retry": 2,
+  "retry_interval": 5,
+  "report_enabled": true,
+  "sn_required": true,
+  "timeout": 300
+}

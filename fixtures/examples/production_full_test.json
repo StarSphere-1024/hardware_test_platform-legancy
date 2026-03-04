@@ -1,0 +1,16 @@
+{
+  "fixture_name": "production_full_test",
+  "description": "Production full function test - all modules verification",
+  "sn_required": true,
+  "cases": [
+    "cases/eth_case.json",
+    "cases/uart_case.json"
+  ],
+  "execution": "sequential",
+  "stop_on_failure": true,
+  "loop": false,
+  "retry": 1,
+  "retry_interval": 3,
+  "report_enabled": true,
+  "upload_oss": false
+}

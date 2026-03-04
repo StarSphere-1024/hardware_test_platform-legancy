@@ -1,0 +1,17 @@
+{
+  "fixture_name": "smoke_test",
+  "description": "冒烟测试 - 快速验证基本功能",
+  "cases": [
+    "cases/eth_case.json"
+  ],
+  "execution": "sequential",
+  "stop_on_failure": true,
+  "loop": false,
+  "loop_count": 1,
+  "loop_interval": 0,
+  "retry": 0,
+  "retry_interval": 0,
+  "report_enabled": true,
+  "sn_required": false,
+  "timeout": 30
+}

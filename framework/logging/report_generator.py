@@ -15,11 +15,23 @@ Provides production-grade report output with:
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from framework.core.status_codes import StatusCode
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    """Custom JSON encoder for datetime objects.
+
+    支持 datetime 和 date 对象的 JSON 序列化
+    """
+
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 @dataclass
@@ -227,7 +239,7 @@ class ReportGenerator:
             generated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
         text_content = self._build_text_report(payload)
-        json_content = json.dumps(payload, indent=2, ensure_ascii=False)
+        json_content = json.dumps(payload, indent=2, ensure_ascii=False, cls=DateTimeEncoder)
 
         self._atomic_write(text_report_path, text_content)
         self._atomic_write(json_report_path, json_content)

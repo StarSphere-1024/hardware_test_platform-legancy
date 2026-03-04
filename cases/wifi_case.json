@@ -1,0 +1,20 @@
+{
+  "case_name": "WiFi Test",
+  "description": "WiFi 扫描、连接和 ping 测试",
+  "module": "wifi",
+  "functions": [
+    {
+      "name": "test_wifi",
+      "params": {
+        "ssid": "YourNetworkSSID",
+        "password": "YourPassword"
+      },
+      "enabled": false,
+      "note": "需要配置实际的 WiFi SSID 和密码才能运行"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 5
+}

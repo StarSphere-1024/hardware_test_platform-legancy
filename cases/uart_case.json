@@ -1,19 +1,20 @@
 {
-  "case_name": "UART Module Test",
-  "description": "UART serial communication test",
+  "case_name": "UART Loopback Test",
+  "description": "UART serial communication loopback test",
   "module": "uart",
   "functions": [
     {
       "name": "test_uart",
       "params": {
         "port": "/dev/ttyUSB0",
-        "baudrate": 115200
+        "baudrate": 115200,
+        "loopback": true
       },
       "enabled": true
     }
   ],
   "execution": "sequential",
   "timeout": 30,
-  "retry": 2,
-  "retry_interval": 3
+  "retry": 1,
+  "retry_interval": 2
 }

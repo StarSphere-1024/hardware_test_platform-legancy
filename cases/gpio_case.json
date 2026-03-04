@@ -1,0 +1,21 @@
+{
+  "case_name": "GPIO Test",
+  "description": "GPIO 引脚控制和读取测试",
+  "module": "gpio",
+  "functions": [
+    {
+      "name": "test_gpio",
+      "params": {
+        "pin": 17,
+        "mode": "out",
+        "value": 1
+      },
+      "enabled": true,
+      "note": "需要根据实际 GPIO 引脚编号调整"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 30,
+  "retry": 1,
+  "retry_interval": 2
+}

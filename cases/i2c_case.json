@@ -1,0 +1,20 @@
+{
+  "case_name": "I2C Bus Test",
+  "description": "I2C 总线扫描和设备读写测试",
+  "module": "i2c",
+  "functions": [
+    {
+      "name": "test_i2c",
+      "params": {
+        "bus": 1,
+        "scan": true
+      },
+      "enabled": true,
+      "note": "需要根据实际 I2C 总线编号调整"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

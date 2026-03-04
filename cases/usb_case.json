@@ -1,0 +1,17 @@
+{
+  "case_name": "USB Port Test",
+  "description": "USB 端口检测和设备枚举测试",
+  "module": "usb",
+  "functions": [
+    {
+      "name": "test_usb",
+      "params": {},
+      "enabled": true,
+      "note": "无需参数，自动检测所有 USB 端口"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 30,
+  "retry": 1,
+  "retry_interval": 2
+}

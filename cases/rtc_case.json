@@ -1,0 +1,17 @@
+{
+  "case_name": "RTC Test",
+  "description": "RTC 实时时钟设置和读取测试",
+  "module": "rtc",
+  "functions": [
+    {
+      "name": "test_rtc",
+      "params": {},
+      "enabled": true,
+      "note": "无需参数，自动读取和验证 RTC"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 30,
+  "retry": 1,
+  "retry_interval": 2
+}

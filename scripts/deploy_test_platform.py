@@ -1,0 +1,1 @@
+/home/stellar/Projects/hardware_test_platform/.claude/skills/remote-hardware-testing/scripts/deploy_test_platform.py

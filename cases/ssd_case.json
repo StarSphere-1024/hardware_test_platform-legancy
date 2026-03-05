@@ -1,0 +1,19 @@
+{
+  "case_name": "SSD Speed Test",
+  "description": "SSD 设备检测和速度测试",
+  "module": "ssd",
+  "functions": [
+    {
+      "name": "test_ssd",
+      "params": {
+        "full_test": false
+      },
+      "enabled": true,
+      "note": "检测 SSD 设备，可选速度测试"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

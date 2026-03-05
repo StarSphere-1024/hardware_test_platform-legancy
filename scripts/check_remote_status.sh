@@ -1,0 +1,1 @@
+/home/stellar/Projects/hardware_test_platform/.claude/skills/remote-hardware-testing/scripts/check_remote_status.sh

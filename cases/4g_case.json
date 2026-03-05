@@ -1,0 +1,20 @@
+{
+  "case_name": "4G Module Test",
+  "description": "4G LTE 模块检测和网络连接测试",
+  "module": "4g",
+  "functions": [
+    {
+      "name": "test_4g",
+      "params": {
+        "at_command": "AT",
+        "network_test": false
+      },
+      "enabled": true,
+      "note": "检测 4G 模块并测试 AT 命令"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

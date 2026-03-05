@@ -1,0 +1,19 @@
+{
+  "case_name": "DSI Display Test",
+  "description": "MIPI DSI 屏幕检测和显示输出测试",
+  "module": "dsi",
+  "functions": [
+    {
+      "name": "test_dsi",
+      "params": {
+        "check_output": true
+      },
+      "enabled": true,
+      "note": "检测 DSI 屏幕并检查输出"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

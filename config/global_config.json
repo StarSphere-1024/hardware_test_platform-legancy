@@ -1,6 +1,7 @@
 {
   "product": {
     "sku": "CM4",
+    "board_profile": "default",
     "stage": "DVT",
     "default_sn_for_test": "DVT",
     "engineer": "TBD"

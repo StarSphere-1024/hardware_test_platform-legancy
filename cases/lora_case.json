@@ -1,0 +1,20 @@
+{
+  "case_name": "LoRa Module Test",
+  "description": "LoRa 模块检测和通信测试",
+  "module": "lora",
+  "functions": [
+    {
+      "name": "test_lora",
+      "params": {
+        "frequency": 915,
+        "tx_test": false
+      },
+      "enabled": true,
+      "note": "检测 LoRa 模块并测试通信"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

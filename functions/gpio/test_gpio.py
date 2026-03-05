@@ -31,9 +31,59 @@ Returns:
 
 import argparse
 import glob
+import json
 import os
 import time
+from pathlib import Path
 from typing import Dict, Any, List, Optional
+
+from framework.platform.board_profile import get_profile_value
+
+
+# Default 40Pin header GPIO mapping (Raspberry Pi compatible)
+# Physical pin -> GPIO number
+DEFAULT_40PIN_MAPPING: Dict[int, int] = {
+    3: 2,   # GPIO2 (I2C SDA)
+    5: 3,   # GPIO3 (I2C SCL)
+    7: 4,   # GPIO4
+    8: 14,  # GPIO14 (UART TX)
+    10: 15, # GPIO15 (UART RX)
+    11: 17, # GPIO17
+    12: 18, # GPIO18
+    13: 27, # GPIO27
+    15: 22, # GPIO22
+    16: 23, # GPIO23
+    18: 24, # GPIO24
+    19: 10, # GPIO10 (SPI MOSI)
+    21: 9,  # GPIO9 (SPI MISO)
+    22: 25, # GPIO25
+    23: 11, # GPIO11 (SPI SCLK)
+    24: 8,  # GPIO8 (SPI CE0)
+    26: 7,  # GPIO7 (SPI CE1)
+    29: 5,  # GPIO5
+    31: 6,  # GPIO6
+    32: 12, # GPIO12
+    33: 13, # GPIO13
+    35: 19, # GPIO19
+    36: 16, # GPIO16
+    37: 26, # GPIO26
+    38: 20, # GPIO20
+    40: 21, # GPIO21
+}
+
+
+def _default_mapping_file() -> Path:
+    """Get default 40Pin mapping config file path."""
+    # test_gpio.py -> gpio -> functions -> project_root
+    return Path(__file__).resolve().parents[2] / "config" / "gpio_40pin_mapping.json"
+
+
+def _normalize_mapping(raw_mapping: Dict[Any, Any]) -> Dict[int, int]:
+    """Normalize JSON/object mapping keys and values to int."""
+    normalized: Dict[int, int] = {}
+    for physical_pin, gpio_number in raw_mapping.items():
+        normalized[int(physical_pin)] = int(gpio_number)
+    return normalized
 
 
 def test_gpio(
@@ -244,9 +294,20 @@ def find_gpio_chip() -> Optional[str]:
         GPIO chip name or None
     """
     # Check for gpiochip devices
-    chips = glob.glob("/dev/gpiochip*")
+    chips = [Path(path).name for path in glob.glob("/dev/gpiochip*")]
     if chips:
-        return "gpiochip0"
+        candidates = get_profile_value(
+            "gpio.chip_candidates",
+            default=["gpiochip0", "gpiochip1"],
+        )
+        if isinstance(candidates, list):
+            for candidate in candidates:
+                candidate_name = str(candidate)
+                if candidate_name in chips:
+                    return candidate_name
+
+        # Fallback to first discovered chip if candidates do not match
+        return sorted(chips)[0]
 
     # Check sysfs GPIO
     if os.path.exists("/sys/class/gpio"):
@@ -277,6 +338,104 @@ def list_gpio_pins() -> List[int]:
                     pass
 
     return sorted(pins)
+
+
+def get_40pin_gpio_mapping(mapping_file: Optional[str] = None) -> Dict[int, int]:
+    """
+    Get 40Pin header GPIO mapping.
+
+    获取 40Pin 排针 GPIO 映射
+
+    Priority:
+      1) mapping_file argument
+      2) environment variable GPIO_40PIN_MAPPING_FILE
+            3) board profile: gpio.physical_to_logical
+            4) config/gpio_40pin_mapping.json (backward compatibility)
+            5) built-in default mapping
+
+    Returns:
+        Dictionary mapping physical pin numbers to GPIO numbers
+    """
+    configured_file = mapping_file or os.getenv("GPIO_40PIN_MAPPING_FILE")
+
+    # Unified board profile mapping (preferred when no explicit file override)
+    if not configured_file:
+        profile_mapping = get_profile_value("gpio.physical_to_logical", default=None)
+        if isinstance(profile_mapping, dict) and profile_mapping:
+            try:
+                return _normalize_mapping(profile_mapping)
+            except Exception as error:
+                print(f"[WARN] Invalid board profile GPIO mapping: {error}, fallback to legacy/default mapping")
+
+    mapping_path = Path(configured_file) if configured_file else _default_mapping_file()
+
+    try:
+        if mapping_path.exists():
+            with open(mapping_path, "r", encoding="utf-8") as file:
+                config = json.load(file)
+
+            if isinstance(config, dict) and "mapping" in config and isinstance(config["mapping"], dict):
+                return _normalize_mapping(config["mapping"])
+            if isinstance(config, dict):
+                return _normalize_mapping(config)
+
+            print(f"[WARN] Invalid mapping format in {mapping_path}, fallback to default mapping")
+        else:
+            print(f"[WARN] Mapping file not found: {mapping_path}, fallback to default mapping")
+    except Exception as error:
+        print(f"[WARN] Failed to load mapping file {mapping_path}: {error}, fallback to default mapping")
+
+    return DEFAULT_40PIN_MAPPING.copy()
+
+
+def test_40pin_gpio(
+    pin: int,
+    mode: str = "output",
+    value: Optional[int] = None,
+    timeout: int = 10,
+    mapping_file: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Test 40Pin header GPIO functionality.
+
+    测试 40Pin 排针 GPIO 功能
+
+    Args:
+        pin: Physical pin number (1-40)
+        mode: GPIO mode (input/output)
+        value: Value to set (0/1)
+        timeout: Timeout in seconds
+        mapping_file: Optional mapping file path
+
+    Returns:
+        Dictionary with code, message, and details
+    """
+    start_time = time.time()
+
+    # Get GPIO mapping
+    mapping = get_40pin_gpio_mapping(mapping_file=mapping_file)
+
+    if pin not in mapping:
+        return {
+            "code": -101,
+            "message": f"Physical pin {pin} is not a GPIO pin",
+            "details": {
+                "physical_pin": pin,
+                "available_gpio_pins": list(mapping.keys()),
+            },
+        }
+
+    gpio_number = mapping[pin]
+
+    # Delegate to standard GPIO test
+    result = test_gpio(pin=gpio_number, mode=mode, value=value, timeout=timeout)
+
+    # Add 40Pin context to result
+    result["details"]["physical_pin"] = pin
+    result["details"]["gpio_number"] = gpio_number
+    result["details"]["mapping_file"] = mapping_file or os.getenv("GPIO_40PIN_MAPPING_FILE") or str(_default_mapping_file())
+
+    return result
 
 
 def main():
@@ -350,6 +509,20 @@ def main():
         help="List available GPIO pins",
     )
 
+    # 40Pin header option
+    parser.add_argument(
+        "--40pin",
+        action="store_true",
+        dest="pin_40",
+        help="Use 40Pin header mapping (physical pin numbers)",
+    )
+    parser.add_argument(
+        "--mapping-file",
+        type=str,
+        default=None,
+        help="40Pin mapping config file path (JSON)",
+    )
+
     args = parser.parse_args()
 
     # List pins if requested
@@ -357,15 +530,30 @@ def main():
         print("Available GPIO pins:")
         for pin in list_gpio_pins():
             print(f"  GPIO {pin}")
+        print("\n40Pin Header GPIO Mapping:")
+        mapping = get_40pin_gpio_mapping(mapping_file=args.mapping_file)
+        for phys_pin, gpio in sorted(mapping.items()):
+            print(f"  Pin {phys_pin:2d} -> GPIO {gpio}")
         return 0
 
     # Run test
-    result = test_gpio(
-        pin=args.pin,
-        mode=args.mode,
-        value=args.value,
-        timeout=args.timeout,
-    )
+    if args.pin_40:
+        # Use 40Pin header mapping
+        result = test_40pin_gpio(
+            pin=args.pin,
+            mode=args.mode,
+            value=args.value,
+            timeout=args.timeout,
+            mapping_file=args.mapping_file,
+        )
+    else:
+        # Use standard GPIO
+        result = test_gpio(
+            pin=args.pin,
+            mode=args.mode,
+            value=args.value,
+            timeout=args.timeout,
+        )
 
     # Print result
     print(f"GPIO Test: {result['message']}")

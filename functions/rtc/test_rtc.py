@@ -36,6 +36,8 @@ import time
 from datetime import datetime
 from typing import Dict, Any, Optional
 
+from framework.platform.board_profile import get_profile_value
+
 
 def test_rtc(
     rtc_device: str = "/dev/rtc0",
@@ -57,6 +59,11 @@ def test_rtc(
     Returns:
         Dictionary with code, message, and details
     """
+    # Resolve board-profile default RTC device when caller uses default value
+    profile_default_device = get_profile_value("rtc.default_device", default="/dev/rtc0")
+    if rtc_device == "/dev/rtc0" and isinstance(profile_default_device, str):
+        rtc_device = profile_default_device
+
     start_time = time.time()
     details: Dict[str, Any] = {
         "rtc_device": rtc_device,
@@ -65,9 +72,15 @@ def test_rtc(
     # Check if RTC device exists
     if not os.path.exists(rtc_device):
         # Try alternative RTC devices
-        alternatives = ["/dev/rtc0", "/dev/rtc", "/sys/class/rtc/rtc0"]
+        alternatives = get_profile_value(
+            "rtc.device_candidates",
+            default=["/dev/rtc0", "/dev/rtc", "/sys/class/rtc/rtc0"],
+        )
+        if not isinstance(alternatives, list):
+            alternatives = ["/dev/rtc0", "/dev/rtc", "/sys/class/rtc/rtc0"]
+
         found = False
-        for alt in alternatives:
+        for alt in [str(item) for item in alternatives]:
             if os.path.exists(alt):
                 rtc_device = alt
                 found = True

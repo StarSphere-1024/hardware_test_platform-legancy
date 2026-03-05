@@ -1,0 +1,19 @@
+{
+  "case_name": "HDMI/DP Display Test",
+  "description": "HDMI/DP 显示输出测试",
+  "module": "hdmi",
+  "functions": [
+    {
+      "name": "test_hdmi",
+      "params": {
+        "check_output": true
+      },
+      "enabled": true,
+      "note": "检测 HDMI/DP 接口状态和输出"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

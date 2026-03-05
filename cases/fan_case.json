@@ -1,0 +1,20 @@
+{
+  "case_name": "FAN Test",
+  "description": "风扇 PWM 控制和转速读取测试",
+  "module": "fan",
+  "functions": [
+    {
+      "name": "test_fan",
+      "params": {
+        "pwm_value": 128,
+        "rpm_test": true
+      },
+      "enabled": true,
+      "note": "测试风扇 PWM 控制和转速读取"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

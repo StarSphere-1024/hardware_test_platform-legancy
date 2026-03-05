@@ -7,7 +7,8 @@
       "name": "test_eth",
       "params": {
         "ip": "192.168.100.1",
-        "count": 4
+        "count": 4,
+        "interface": "${interfaces.eth}"
       },
       "enabled": true
     },
@@ -15,7 +16,8 @@
       "name": "test_eth",
       "params": {
         "ip": "8.8.8.8",
-        "count": 4
+        "count": 4,
+        "interface": "${interfaces.eth}"
       },
       "enabled": true
     }
@@ -23,5 +25,12 @@
   "execution": "sequential",
   "timeout": 60,
   "retry": 2,
-  "retry_interval": 5
+  "retry_interval": 5,
+  "precheck": true,
+  "required_interfaces": {
+    "eth": {
+      "select": "auto",
+      "required": true
+    }
+  }
 }

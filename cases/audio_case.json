@@ -1,0 +1,20 @@
+{
+  "case_name": "Audio Test",
+  "description": "音频录音和播放测试",
+  "module": "audio",
+  "functions": [
+    {
+      "name": "test_audio",
+      "params": {
+        "record_test": true,
+        "duration": 3
+      },
+      "enabled": true,
+      "note": "测试麦克风录音功能"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

@@ -7,11 +7,21 @@
       "name": "test_gpio",
       "params": {
         "pin": 17,
-        "mode": "out",
+        "mode": "output",
         "value": 1
       },
       "enabled": true,
-      "note": "需要根据实际 GPIO 引脚编号调整"
+      "note": "基础 GPIO 测试"
+    },
+    {
+      "name": "test_40pin_gpio",
+      "params": {
+        "pin": 11,
+        "mode": "output",
+        "value": 1
+      },
+      "enabled": false,
+      "note": "40Pin 排针 GPIO 测试 (物理引脚 11 -> GPIO17)"
     }
   ],
   "execution": "sequential",

@@ -6,11 +6,11 @@
     {
       "name": "test_wifi",
       "params": {
-        "ssid": "YourNetworkSSID",
-        "password": "YourPassword"
+        "ssid": "SEEED-MKT",
+        "password": "edgemaker2023"
       },
       "enabled": false,
-      "note": "需要配置实际的 WiFi SSID 和密码才能运行"
+      "note": "根据实际需要配置 WiFi SSID 和密码"
     }
   ],
   "execution": "sequential",

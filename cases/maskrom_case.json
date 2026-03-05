@@ -1,0 +1,17 @@
+{
+  "case_name": "Maskrom Burn Test",
+  "description": "Maskrom 模式检测和 rkdeveloptool 工具检查",
+  "module": "maskrom",
+  "functions": [
+    {
+      "name": "test_maskrom",
+      "params": {},
+      "enabled": true,
+      "note": "检测 Maskrom 模式设备和工具"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 1,
+  "retry_interval": 3
+}

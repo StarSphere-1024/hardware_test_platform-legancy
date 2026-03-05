@@ -35,9 +35,10 @@ from typing import Dict, Any, List
 
 
 def test_i2c(
-    bus: int,
+    bus: int = None,
     address: int = None,
     timeout: int = 10,
+    scan_all: bool = False,
 ) -> Dict[str, Any]:
     """
     Test I2C bus functionality.
@@ -45,36 +46,110 @@ def test_i2c(
     测试 I2C 总线功能
 
     Args:
-        bus: I2C bus number (e.g., 1 for /dev/i2c-1)
+        bus: I2C bus number (e.g., 1 for /dev/i2c-1), if None and scan_all=True, scans all buses
         address: I2C device address (optional)
         timeout: Timeout in seconds
+        scan_all: If True, scan all available I2C buses
 
     Returns:
         Dictionary with code, message, and details
     """
     start_time = time.time()
-    details: Dict[str, Any] = {
-        "bus": bus,
-        "address": hex(address) if address else None,
-    }
+    details: Dict[str, Any] = {}
+
+    # Get all available I2C buses
+    available_buses = list_i2c_buses()
+    details["total_bus_count"] = len(available_buses)
+    details["available_buses"] = available_buses
+
+    if not available_buses:
+        return {
+            "code": -101,  # DEVICE_NOT_FOUND
+            "message": "No I2C buses found on this system",
+            "details": details,
+        }
+
+    # If scan_all is True, scan all buses
+    if scan_all:
+        bus_results = []
+        total_devices = 0
+
+        for bus_path in available_buses:
+            # Extract bus number from path (e.g., "/dev/i2c-1" -> 1)
+            bus_num = int(bus_path.split("-")[-1])
+            bus_result = _scan_single_bus(bus_num, address)
+            bus_results.append({
+                "bus": bus_num,
+                "device_path": bus_path,
+                "device_count": bus_result.get("device_count", 0),
+                "scanned_devices": bus_result.get("scanned_devices", []),
+            })
+            total_devices += bus_result.get("device_count", 0)
+
+        details["bus_scan_results"] = bus_results
+        details["total_device_count"] = total_devices
+
+        duration = time.time() - start_time
+        return {
+            "code": 0,
+            "message": f"Scanned {len(available_buses)} I2C buses, found {total_devices} devices total",
+            "duration": round(duration, 2),
+            "details": details,
+        }
+
+    # Single bus test (legacy behavior)
+    if bus is None:
+        return {
+            "code": -2,
+            "message": "Bus number required when scan_all=False",
+            "details": details,
+        }
+
+    return _scan_single_bus(bus, address, timeout, start_time, details)
+
+
+def _scan_single_bus(
+    bus: int,
+    address: int = None,
+    timeout: int = 10,
+    start_time: float = None,
+    details: Dict[str, Any] = None,
+) -> Dict[str, Any]:
+    """
+    Scan a single I2C bus for devices.
+
+    Args:
+        bus: I2C bus number
+        address: Optional device address to test read/write
+        timeout: Timeout in seconds
+        start_time: Optional start time for duration calculation
+        details: Optional details dict to populate
+
+    Returns:
+        Dictionary with code, message, and details
+    """
+    if start_time is None:
+        start_time = time.time()
+    if details is None:
+        details = {"bus": bus}
+    else:
+        details["bus"] = bus
+
+    details["address"] = hex(address) if address else None
 
     # Check if I2C bus exists
     i2c_device = f"/dev/i2c-{bus}"
     if not os.path.exists(i2c_device):
-        available_buses = list_i2c_buses()
         return {
-            "code": -101,  # DEVICE_NOT_FOUND
+            "code": -101,
             "message": f"I2C bus '{i2c_device}' not found",
-            "details": {
-                **details,
-                "available_buses": available_buses,
-            },
+            "details": details,
         }
 
     # Check read/write permissions
     if not os.access(i2c_device, os.R_OK | os.W_OK):
         return {
-            "code": -1,  # FAILED
+            "code": -1,
             "message": f"No read/write permission for '{i2c_device}'",
             "details": details,
         }
@@ -86,12 +161,11 @@ def test_i2c(
             import smbus as smbus2
         except ImportError:
             return {
-                "code": -2,  # ENV_MISSING
+                "code": -2,
                 "message": "smbus2/smbus not installed. Run: pip install smbus2",
                 "details": details,
             }
 
-    # Run scan test
     try:
         bus_obj = smbus2.SMBus(bus)
         details["connection"] = "opened"
@@ -111,7 +185,6 @@ def test_i2c(
         # If specific address provided, test read/write
         if address is not None:
             try:
-                # Try to read one byte
                 data = bus_obj.read_byte(address)
                 details["read_test"] = "success"
                 details["read_data"] = data
@@ -123,7 +196,7 @@ def test_i2c(
 
     except Exception as e:
         return {
-            "code": -102,  # DEVICE_ERROR
+            "code": -102,
             "message": f"I2C communication error: {e}",
             "details": details,
         }
@@ -131,7 +204,7 @@ def test_i2c(
     duration = time.time() - start_time
 
     return {
-        "code": 0,  # SUCCESS
+        "code": 0,
         "message": f"I2C bus {bus} test passed, found {len(scanned_devices)} devices",
         "duration": round(duration, 2),
         "details": details,
@@ -167,14 +240,19 @@ def main():
     parser.add_argument(
         "--bus",
         type=int,
-        required=True,
-        help="I2C bus number (required, e.g., 1)",
+        default=None,
+        help="I2C bus number (optional, scans all buses if not provided)",
     )
     parser.add_argument(
         "--address",
         type=lambda x: int(x, 0),  # Support hex and decimal
         default=None,
         help="I2C device address (optional, e.g., 0x50)",
+    )
+    parser.add_argument(
+        "--scan-all",
+        action="store_true",
+        help="Scan all available I2C buses",
     )
     parser.add_argument(
         "--timeout",
@@ -206,7 +284,7 @@ def main():
     )
     parser.add_argument(
         "-w",
-        "--timeout",
+        "--wait-timeout",
         type=int,
         default=None,
         help="Wait timeout (seconds)",
@@ -233,6 +311,7 @@ def main():
         bus=args.bus,
         address=args.address,
         timeout=args.timeout,
+        scan_all=args.scan_all or args.bus is None,
     )
 
     # Print result

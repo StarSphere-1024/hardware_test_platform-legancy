@@ -1,0 +1,1 @@
+/home/stellar/Projects/hardware_test_platform/.claude/skills/remote-hardware-testing/scripts/fetch_reports.sh

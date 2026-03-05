@@ -1,0 +1,22 @@
+{
+  "case_name": "EEPROM Test",
+  "description": "I2C EEPROM 读写测试",
+  "module": "eeprom",
+  "functions": [
+    {
+      "name": "test_eeprom",
+      "params": {
+        "address": 80,
+        "read_test": true,
+        "write_test": false,
+        "write_protect_test": false
+      },
+      "enabled": true,
+      "note": "测试 I2C EEPROM 读写 (0x50 = 80)"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

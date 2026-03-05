@@ -1,0 +1,19 @@
+{
+  "case_name": "WiFi Halow Test",
+  "description": "WiFi Halow (802.11ah) 模块检测和连接测试",
+  "module": "wifi_halo",
+  "functions": [
+    {
+      "name": "test_wifi_halo",
+      "params": {
+        "connect_test": false
+      },
+      "enabled": true,
+      "note": "检测 WiFi Halow 模块"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

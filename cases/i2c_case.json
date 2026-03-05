@@ -1,16 +1,15 @@
 {
-  "case_name": "I2C Bus Test",
-  "description": "I2C 总线扫描和设备读写测试",
+  "case_name": "I2C Bus Scan",
+  "description": "扫描所有 I2C 总线数量和每条总线上的设备",
   "module": "i2c",
   "functions": [
     {
       "name": "test_i2c",
       "params": {
-        "bus": 1,
-        "scan": true
+        "scan_all": true
       },
       "enabled": true,
-      "note": "需要根据实际 I2C 总线编号调整"
+      "note": "扫描所有 I2C 总线，返回总线数量和各总线上的设备地址列表"
     }
   ],
   "execution": "sequential",

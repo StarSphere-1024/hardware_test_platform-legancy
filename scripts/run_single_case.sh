@@ -1,0 +1,1 @@
+/home/stellar/Projects/hardware_test_platform/.claude/skills/remote-hardware-testing/scripts/run_single_case.sh

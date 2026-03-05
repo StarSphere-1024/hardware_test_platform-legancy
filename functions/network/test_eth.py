@@ -36,6 +36,7 @@ import re
 from typing import Dict, Any, Optional
 
 from framework.core.status_codes import StatusCode
+from framework.platform.board_profile import get_profile_value
 
 
 def test_eth(
@@ -185,13 +186,23 @@ def _detect_interface() -> str:
         )
 
         if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
+            # Multiple default routes may return multiple lines; use the first valid interface.
+            first_iface = result.stdout.strip().splitlines()[0].strip()
+            if first_iface:
+                return first_iface
 
     except Exception:
         pass
 
-    # Fallback: try common interfaces
-    for iface in ["eth0", "enp0s3", "eno1", "wlan0"]:
+    # Fallback: try board-profile interface candidates
+    candidates = get_profile_value(
+        "network.interface_candidates",
+        default=["eth0", "enp0s3", "eno1", "wlan0"],
+    )
+    if not isinstance(candidates, list):
+        candidates = ["eth0", "enp0s3", "eno1", "wlan0"]
+
+    for iface in [str(item) for item in candidates]:
         try:
             result = subprocess.run(
                 f"ip link show {iface}",

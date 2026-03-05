@@ -1,0 +1,20 @@
+{
+  "case_name": "BLE Bluetooth Test",
+  "description": "BLE 蓝牙适配器检测和扫描测试",
+  "module": "ble",
+  "functions": [
+    {
+      "name": "test_ble",
+      "params": {
+        "adapter": "hci0",
+        "scan": true
+      },
+      "enabled": true,
+      "note": "检测 BLE 适配器并扫描设备"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

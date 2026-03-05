@@ -1,0 +1,19 @@
+{
+  "case_name": "CSI Camera Test",
+  "description": "MIPI CSI 摄像头检测和图像采集测试",
+  "module": "csi",
+  "functions": [
+    {
+      "name": "test_csi",
+      "params": {
+        "capture_test": false
+      },
+      "enabled": true,
+      "note": "检测 CSI 摄像头，可选图像采集测试"
+    }
+  ],
+  "execution": "sequential",
+  "timeout": 60,
+  "retry": 2,
+  "retry_interval": 3
+}

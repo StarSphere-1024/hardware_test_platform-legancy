@@ -1,0 +1,33 @@
+{
+  "fixture_name": "rk3576_full_test",
+  "description": "RK3576 开发板完整硬件测试 - 覆盖所有 13 个测试项",
+  "cases": [
+    "cases/hdmi_case.json",
+    "cases/ssd_case.json",
+    "cases/gpio_case.json",
+    "cases/ble_case.json",
+    "cases/4g_case.json",
+    "cases/lora_case.json",
+    "cases/wifi_halo_case.json",
+    "cases/audio_case.json",
+    "cases/fan_case.json",
+    "cases/eeprom_case.json",
+    "cases/csi_case.json",
+    "cases/dsi_case.json",
+    "cases/hailo_case.json",
+    "cases/eth_case.json",
+    "cases/wifi_case.json",
+    "cases/rtc_case.json",
+    "cases/i2c_case.json",
+    "cases/uart_case.json",
+    "cases/usb_case.json",
+    "cases/maskrom_case.json"
+  ],
+  "execution": "sequential",
+  "stop_on_failure": false,
+  "retry": 2,
+  "retry_interval": 3,
+  "report_enabled": true,
+  "sn_required": false,
+  "timeout": 600
+}
